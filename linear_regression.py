@@ -46,8 +46,9 @@ def main():
     epoch = 0
 
     while epoch != 1000:
-        lr.t0 -= gradient0(km, price)
-        lr.t1 -= gradient1(km, price)
+        t0, t1 = gradient0(km, price), gradient1(km, price)
+        lr.t0 -= t0
+        lr.t1 -= t1
         epoch += 1
     
     lr.t1 = (lr.max_p - lr.min_p) * lr.t1 / (lr.max_k - lr.min_k)
@@ -60,7 +61,7 @@ def main():
     print(f"Precision : +/- {mse:.3f}")
 
     with open("theta.csv", "w") as file:
-        file.write(f"t0,t1\n{lr.t0},{lr.t1}")
+        file.write(f"t0,t1,precision\n{lr.t0},{lr.t1},{mse}")
 
 if __name__ == "__main__":
     if not os.path.exists("data.csv"):

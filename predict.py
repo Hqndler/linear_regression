@@ -4,7 +4,7 @@ import sys
 
 def get_data():
     data = pd.read_csv("theta.csv")
-    return data["t0"][0], data["t1"][0] 
+    return data["t0"][0], data["t1"][0]
 
 def predict_price(mileage):
     t0, t1 = get_data()
