@@ -1,5 +1,6 @@
 import sys, os
 import pandas as pd
+import matplotlib.pyplot as plt
 
 class LinearRegression:
     t0 = 0
@@ -11,7 +12,7 @@ class LinearRegression:
     max_p = 0
 
     def __str__(self):
-        return f"t0 = {self.t0}, t1 = {self.t1}, learning rate = {self.lr}"
+        return f"t0 = {self.t0:.3f}, t1 = {self.t1:.8f}, learning rate = {self.lr}"
 
 def estimate_price(mileage : float):
     return lr.t0 + (lr.t1 * mileage)
@@ -42,16 +43,48 @@ def standardize(km, price):
     return km, price
 
 def main():
+    k, p = get_data()
     km, price = standardize(*get_data())
     epoch = 0
+
+    plt.ion()
+    plt.plot(k, p, "og")
+    plt.xticks(range(0,300_000, 50_000))
+    plt.yticks(range(3000, 9000, 500))
+    plt.xlim(0,300_000)
+    plt.ylim(3000,9000)
+    plt.xlabel("Mileage")
+    plt.ylabel("Price")
+    line, = plt.plot(k, [6000] * len(k), color="red", label="Prediction") # visual purpose
+    plt.legend()
+    plt.title("Linear Regression - Waiting to train")
+    plt.draw()
+    plt.show()
+    input()
 
     while epoch != 3000:
         lr.t0 -= gradient0(km, price)
         lr.t1 -= gradient1(km, price)
         epoch += 1
+        if epoch % 100 == 0:
+            tt0 = lr.t0
+            tt1 = lr.t1
+            lr.t1 = (lr.max_p - lr.min_p) * lr.t1 / (lr.max_k - lr.min_k)
+            lr.t0 = lr.min_p + ((lr.max_p - lr.min_p) * lr.t0) + lr.t1 * (1 - lr.min_k)
+            print(lr, f"epoch = {epoch}")
+            plt.title(f"Epoch {epoch}/3000")
+            line.set_ydata([estimate_price(i) for i in k])
+            plt.draw()
+            plt.show()
+            input()
+            lr.t0 = tt0
+            lr.t1 = tt1
 
     lr.t1 = (lr.max_p - lr.min_p) * lr.t1 / (lr.max_k - lr.min_k)
     lr.t0 = lr.min_p + ((lr.max_p - lr.min_p) * lr.t0) + lr.t1 * (1 - lr.min_k)
+
+    plt.ioff()
+    plt.show()
 
     print(lr)
 
